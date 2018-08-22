@@ -16,7 +16,7 @@ class Runner {
     /**
      * @var bool If true, all Command output is returned verbatim
      **/
-    private $debug = false;
+    private $debug = true;
     /**
      * Constructor
      *

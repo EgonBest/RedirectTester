@@ -8,7 +8,7 @@
 
 
 include "parseJson.php";
-$parser = new \RedirectTester\parseJson(htmlentities($_GET['testUrl']));
+$parser = new \RedirectTester\parseJson(htmlentities($_POST['testUrl']));
 $daten = [];
 $daten['data'] = $parser->getData();
 $daten['Error'] = $parser->getError();

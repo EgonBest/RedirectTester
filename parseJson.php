@@ -8,6 +8,7 @@
 
 namespace RedirectTester;
 include "hybrid/Runner.php";
+error_reporting(0);
 
 class parseJson
 {
@@ -79,7 +80,13 @@ class parseJson
     {
         $runner = new \HybridLogic\PhantomJS\Runner();
         $this->result = $runner->execute($this->script, $this->url);
-        return ($this->result !== "" && is_null($this->result) === false) ? true : false;
+        if(!is_array($this->result)){
+            $this->error = true;
+            $pattern = "/^{.*^}/ms";
+            preg_match_all($pattern, $this->result, $matches);
+            $this->result = json_decode($matches[0][0],true);
+        }
+        return $this->error;
     }
 
     /**
@@ -96,9 +103,20 @@ class parseJson
             $size = $entrie["response"]["content"]["size"];
             $type = explode("/", $entrie["response"]["content"]["mimeType"]);
             $type = explode(";", $type[1]);
-            $TypeKey = $type[0];
-            $Type[$TypeKey] += 1;
+            $TypeKey = ($type[0]!=="")?$type[0]:"ohne";
+            $Type[$TypeKey]['Requests'] +=1;
+            $Type[$TypeKey]['Size'] = ($size > 0)?$Type[$TypeKey]['Size'] + $size:$Type[$TypeKey]['Size'];
             $allSize = $allSize + $size;
+            $arr['url'] = htmlentities($entrie["request"]["url"]);
+            $arr['size'] = $size;
+            $arr['time'] = $entrie["time"];
+            if(is_array($Type[$TypeKey]['Urls'])){
+                array_push($Type[$TypeKey]['Urls'],$arr);
+            } else {
+                $Type[$TypeKey]['Urls']=[];
+                $Type[$TypeKey]['Urls'][0]=$arr;
+            }
+            $allSize = ($size > 0)?$allSize + $size:$allSize;
         }
         $this->size = $allSize;
         $this->requests = $allRequest;
@@ -146,6 +164,13 @@ class parseJson
      */
     public function getTime(){
         return $this->time;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getError(){
+        return $this->error;
     }
     /**
      * @param $script

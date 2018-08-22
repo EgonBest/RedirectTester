@@ -24,11 +24,15 @@
             left: 50px;
             z-index: 30;
         }
+        div#Bilder{
+            display:none;
+        }
 
         .urls{
             display: none;
             font-size:small;
         }
+
     </style>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
@@ -41,12 +45,13 @@
           };
           $.ajax({
             type: 'POST',
-            url: 'runnertest.php',
+            url: 'Redirect.php',
             data: formData,
             dataType: 'json',
             encode: true
           })
           .done(function (data) {
+              console.log(data.data);
             $('#Types').empty();
             var err = (data.Error === true) ? "HTTP" : "HTTPS";
             $('#Error').text(err);
@@ -57,7 +62,7 @@
             $.each(data.Type, function (index, item) {
               $('#Types').append("<div id="+index+" class=\"Requests\">" + item['Requests'] + " X " + index + " ( " + item['Size'] + " Byte )</div>");
               $.each(item['Urls'], function (index1, item1) {
-                $('#' + index).append("<div class=\""+index+" urls\"><a href="+item1['url']+" target=\"_blank\">" + item1['url'] + "</a> " + item1['size'] + " Byte</div>");
+                $('#' + index).append("<div class=\""+index+" urls\"><a href="+item1['url']+" target=\"_blank\">" + item1['url'] + "</a> " + item1['size'] + " Byte " + item1['time'] + " Ladezeit</div>");
               });
               daten[i] = [];
               daten[i]['value'] = [];
@@ -73,6 +78,7 @@
             $(".Requests").mouseleave(function () {
               $(this.childNodes).hide();
             });
+            $('#Bilder').show();
             daten.clear;
             //console.log("JSON = " + JSON.stringify(data));
             google.charts.load('current', {'packages': ['corechart']});
@@ -117,6 +123,11 @@
     Größe <span id="Size"></span><br>
     Ladezeit <span id="Time"></span><br>
     Dateitypen <div id="Types"></div><br>
+</div>
+<div id="Bilder">
+    <a href="onload.jpeg" target="blank">OnLoad Bild anzeigen</a>
+    <a href="tenSeconds.jpeg" target="blank">PreLoad Bild anzeigen</a>
+
 </div>
 Falls ein ins, script oder iframe Tag getestet werden soll geht es <a href="tag.html">hier</a> weiter
 </body>

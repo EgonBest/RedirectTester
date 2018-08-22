@@ -20,9 +20,14 @@ if($debug == true){
 if(!is_array($result)){
     $ret['Error'] = true;
     if($debug == true) {
-        echo "<h2>Scheinbar stimmt das HTTPS Protokoll nicht</h2>";
+        echo "<h2>Scheinbar stimmt das HTTPS Protokoll nicht</h2>";#
     }
-} else {
+    $pattern = "/^{.*^}/ms";
+
+    preg_match_all($pattern, $result, $matches);
+    $result = json_decode($matches[0][0],true);
+}
+if(is_array($result)){
     $allSize = 0;
     $allRequest =0;
     $ladezeit = $result['log']['pages'][0]['pageTimings']['onLoad'];
@@ -33,15 +38,25 @@ if(!is_array($result)){
         $type = explode("/",$entrie["response"]["content"]["mimeType"]);
         $type = explode(";",$type[1]);
         $TypeKey = $type[0];
-        $Type[$TypeKey] +=1;
-       // $Type[$TypeKey]['Mime']=$entrie["response"]["content"]["mimeType"];
-        $allSize = $allSize + $size;
+        $Type[$TypeKey]['Requests'] +=1;
+        $Type[$TypeKey]['Size'] = ($size > 0)?$Type[$TypeKey]['Size'] + $size:$Type[$TypeKey]['Size'];
+        $arr['url'] = htmlentities($entrie["request"]["url"]);
+        $arr['size'] = $size;
+        if(is_array($Type[$TypeKey]['Urls'])){
+            array_push($Type[$TypeKey]['Urls'],$arr);
+        } else {
+            $Type[$TypeKey]['Urls'][0]=$arr;
+        }
+        $allSize = ($size > 0)?$allSize + $size:$allSize;
         if($debug == true) {
-            echo $type[0] ." = ". $entrie["response"]["content"]["mimeType"];
+            echo $type[0];
             echo $size;
             echo " Byte <br>";
         }
     }
+    echo "<pre>";
+    print_r($Type);
+    echo "</pre>";
     if($debug == true) {
         echo "Gesamtgröße " . $allSize;
         echo "<br>";

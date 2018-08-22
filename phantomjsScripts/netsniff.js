@@ -28,9 +28,9 @@ function createHAR(address, title, startTime, resources)
 
     // Exclude Data URI from HAR file because
     // they aren't included in specification
-    if (request.url.match(/(^data:image\/.*)/i)) {
-      return;
-    }
+    //if (request.url.match(/(^data:image\/.*)/i)) {
+    //  return;
+    //}
 
     entries.push({
       startedDateTime: request.time.toISOString(),
@@ -129,7 +129,7 @@ if (system.args.length === 1) {
   };
 
   page.open(page.address, function (status) {
-    var har;
+    var har, har1, har2;
     if (status !== 'success') {
       console.log('FAIL to load the address');
       phantom.exit(1);
@@ -138,8 +138,12 @@ if (system.args.length === 1) {
       page.title = page.evaluate(function () {
         return document.title;
       });
-      setTimeout(function(){
         har = createHAR(page.address, page.title, page.startTime, page.resources);
+        page.render('onload.jpeg', {format: 'jpeg', quality: '100'});
+      setTimeout(function(){
+          page.render('tenSeconds.jpeg', {format: 'jpeg', quality: '100'});
+        //har2 = createHAR(page.address, page.title, page.endTime, page.resources);
+        //har = {"har1" : har1, "har2" : har2};
         console.log(JSON.stringify(har, undefined, 4));
         phantom.exit();},5000);
     }
